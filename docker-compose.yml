@@ -1,0 +1,76 @@
+version: '3.7'
+
+services:
+    app-web:
+        container_name: app-web
+        build:
+            context: ./docker/nginx
+            args:
+                UID: $U_ID
+        ports:
+            - 400:80
+        volumes:
+            - ./public:/appdata/www/public
+        networks:
+            - app-network
+        depends_on:
+            - app-be
+
+    app-be:
+        container_name: app-be
+        build:
+            context: ./docker/php
+            args:
+                UID: $U_ID
+        volumes:
+            - ./:/appdata/www
+            - ~/.ssh/id_rsa:/home/appuser/.ssh/id_rsa
+        networks:
+            - app-network
+        depends_on:
+            - app-db
+
+    app-db:
+        container_name: app-db
+        image: postgres:13.5
+        ports:
+            - 401:5432
+        environment:
+            - POSTGRES_USER=postgres
+            - POSTGRES_PASSWORD=123456
+        volumes:
+            - app-postgres-data:/var/lib/postgresql/data
+        networks:
+            - app-network
+
+    app-mercury:
+        container_name: app-mercury
+        image: dunglas/mercure
+        restart: unless-stopped
+        environment:
+            # Uncomment the following line to disable HTTPS
+            SERVER_NAME: ':80'
+            MERCURE_PUBLISHER_JWT_KEY: '!ChangeMe!'
+            MERCURE_SUBSCRIBER_JWT_KEY: '!ChangeMe!'
+            #MERCURE_EXTRA_DIRECTIVES: |
+            #  cors_origins http://localhost:300 http://localhost:80 http://localhost:4200 http://hostnamebe
+            # Uncomment the following line to enable the development mode
+        command: /usr/bin/caddy run -config /etc/caddy/Caddyfile.dev
+        ports:
+            - "402:80"
+            #- "4430:443"
+        volumes:
+            - app_caddy_data:/data
+            - app_caddy_config:/config
+        networks:
+            - app-network
+
+volumes:
+    app-postgres-data:
+    app_caddy_data:
+    app_caddy_config:
+
+
+networks:
+    app-network:
+        external: true
