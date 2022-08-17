@@ -60,13 +60,6 @@ ssh-db: ## ssh's into the be container
 ssh-psql: ## ssh's into the be container
 	U_ID=${UID} docker exec -it --user ${UID} ${DOCKER_DB} psql -U postgres
 
-ssh-psql-restore: ## ssh's into the be container
-	U_ID=${UID} docker exec -i --user ${UID} ${DOCKER_DB} psql -U postgres -d radman -f /var/lib/postgresql/backs/radman.sql
-	U_ID=${UID} docker exec -i --user ${UID} ${DOCKER_DB} psql -U postgres -d radman_performance -f /var/lib/postgresql/backs/radman_performance.sql
-	U_ID=${UID} docker exec -i --user ${UID} ${DOCKER_DB} psql -U postgres -d radius2 -f /var/lib/postgresql/backs/radius2.sql
-	U_ID=${UID} docker exec -i --user ${UID} ${DOCKER_DB} psql -U postgres -d radius2_radacct -f /var/lib/postgresql/backs/radius2-radacct.sql
-	U_ID=${UID} docker exec -i --user ${UID} ${DOCKER_DB} psql -U postgres -d radapi -f /var/lib/postgresql/backs/radapi_log.sql
-
 generate-var: ## Generate folder cache
 	U_ID=${UID} docker exec -it --user ${UID} ${DOCKER_BE} mkdir -m 777 -p var/cache/
 	U_ID=${UID} docker exec -it --user ${UID} ${DOCKER_BE} mkdir -m 777 -p var/log/
